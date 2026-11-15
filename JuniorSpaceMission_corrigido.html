@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071426">
+<title>Junior Space Mission</title>
+<style>
+:root{--bg:#071321;--panel:#102238;--panel2:#0b1b2d;--line:#29445d;--cyan:#65ddff;--green:#65e6ae;--gold:#ffd477;--red:#ff7888;--muted:#9bb2c8}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#1b4264 0,#071321 55%,#030912 100%);color:#eef7ff;font:14px system-ui,Arial,sans-serif}
+header{height:60px;position:sticky;top:0;z-index:5;background:#071321ed;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 14px;backdrop-filter:blur(10px)}
+.brand{font-weight:900;letter-spacing:.08em;font-size:13px}.brand span{color:var(--cyan)}.headcontrols{display:flex;gap:7px}select,input{background:#0b1d30;color:#eef7ff;border:1px solid #34536f;border-radius:9px;padding:9px;min-width:0}button,select,input{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button{position:relative;z-index:1;pointer-events:auto; background:#17324c;border:1px solid #355572;color:#eff8ff;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}button:active{transform:scale(.98)}button.primary{background:linear-gradient(120deg,#65ddff,#5797ff);color:#061626;border:0}
+main{max-width:1200px;margin:auto;padding:13px;display:grid;gap:12px}.topline{display:flex;align-items:center;justify-content:space-between;gap:10px}.eyebrow{font-size:10px;color:var(--cyan);letter-spacing:.16em;font-weight:900}.topline h1{font-size:clamp(20px,4vw,30px);margin:3px 0}.muted{color:var(--muted);font-size:11px}
+.scene{height:360px;position:relative;border:1px solid #31516e;border-radius:18px;overflow:hidden;background:#030916;box-shadow:0 15px 38px #0007}.scene canvas{width:100%;height:100%;display:block;touch-action:none}.sceneTag{position:absolute;top:10px;left:10px;background:#07182cdd;border:1px solid #31516e;border-radius:9px;padding:7px 9px;color:var(--cyan);font-size:10px}.viewtools{position:absolute;right:9px;top:9px;display:flex;gap:5px}.viewtools button{padding:7px 9px;background:#07182cdd}.legend{position:absolute;bottom:9px;left:9px;display:flex;flex-wrap:wrap;gap:5px}.legend span{font-size:10px;background:#07182cdd;border:1px solid #29445d;border-radius:8px;padding:5px 7px}
+.panel{background:linear-gradient(145deg,#10243a,#091829);border:1px solid var(--line);border-radius:16px;padding:13px;box-shadow:0 8px 25px #0003}.panel h2{font-size:11px;letter-spacing:.12em;color:#cfe8fa;margin:0 0 11px}.resourceGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.res{background:#071626;border:1px solid #203b54;border-radius:11px;padding:8px}.reshead{display:flex;justify-content:space-between;font-size:10px;color:#b8cadd}.res strong{font-size:17px;display:block;margin:4px 0}.bar{height:5px;background:#20364b;border-radius:9px;overflow:hidden}.bar i{height:100%;display:block;background:var(--green)}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.actions button{font-size:11px;padding:11px 4px}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tile{text-align:left;min-height:70px;font-size:12px}.tile small{display:block;color:var(--muted);font-weight:400;margin-top:4px;font-size:10px}
+.side{display:grid;gap:12px}.statusline{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.progress{height:5px;background:#20364b;border-radius:9px;margin:7px 0 12px;overflow:hidden}.progress i{height:100%;display:block;background:linear-gradient(90deg,#65ddff,#65e6ae)}
+.objectives{font-size:12px;line-height:1.9;color:#d4e5f2}.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.pill{font-size:10px;border:1px solid #29445d;background:#07182a;border-radius:99px;padding:6px 9px;color:#cfe3f3}
+.assistantHead{display:flex;align-items:center;gap:9px}.avatar{height:38px;width:38px;border:1px solid var(--cyan);border-radius:50%;display:grid;place-items:center;font-size:21px}.reply{background:#071626;border:1px solid #203b54;border-radius:11px;padding:10px;font-size:12px;line-height:1.55;min-height:54px;margin:10px 0;color:#d6e7f5}.chat{display:flex;gap:6px}.chat input{flex:1;width:40px}.feed{max-height:150px;overflow:auto;color:#b9ccdc;font-size:11px;line-height:1.6}.feed div{border-bottom:1px solid #1d3449;padding:5px 0}
+.tabs{display:flex;gap:6px}.tabs button{flex:1;font-size:11px}.tabs button.active{border-color:var(--cyan);color:var(--cyan)}footer{text-align:center;color:#7089a1;font-size:10px;padding:8px 0 20px}
+.modal{display:none;position:fixed;inset:0;background:#000b;z-index:10;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.modalbox{width:100%;max-width:440px;background:#0d2035;border:1px solid #3b6687;border-radius:16px;padding:19px}.modalbox p{font-size:13px;line-height:1.6;color:#c5d9e9}.modalbox button{width:100%;margin-top:8px}
+@media(min-width:850px){main{grid-template-columns:1.5fr .9fr}.topline,.scene,.resourcepanel,.controlpanel{grid-column:1}.side{grid-column:2;grid-row:1/span 5}.scene{height:500px}}
+@media(max-width:430px){.scene{height:300px}.resourceGrid{gap:5px}.res{padding:6px}.res strong{font-size:15px}.actions{grid-template-columns:repeat(2,1fr)}.brand{font-size:11px}}
+</style>
+</head>
+<body>
+<header><div class="brand">🚀 JUNIOR <span>SPACE MISSION</span></div><div class="headcontrols"><select id="language" aria-label="Idioma"><option value="pt">🇵🇹 PT</option><option value="en">🇬🇧 EN</option><option value="es">🇪🇸 ES</option></select><button id="soundBtn" title="Som">🔊</button></div></header>
+<main>
+<section class="topline"><div><div class="eyebrow">SIMULADOR EDUCATIVO · STEM</div><h1 id="missionTitle">Missão: Aurora Lunar</h1><div class="muted" id="missionSub">BASE LUNAR · CRATERA SHACKLETON · DIA 1/30</div></div><button id="tutorialBtn">▶ Tutorial</button></section>
+<section class="scene"><canvas id="world"></canvas><div class="sceneTag" id="sceneTitle">● AMBIENTE 3D · BASE LUNAR</div><div class="viewtools"><button id="viewReset">◎</button><button id="zoomPlus">＋</button><button id="zoomMinus">－</button></div><div class="legend"><span>🏠 Habitat</span><span>🌱 Estufa</span><span>🔬 Laboratório</span><span>🚙 Rover</span><span>☀️ Painéis solares</span></div></section>
+<section class="panel" id="facilityInspector">
+<h2>🔎 CENTRO DE SISTEMAS DA BASE</h2>
+<p class="muted" id="facilitySummary">Seleciona uma instalação para veres o que faz. As estruturas ficam visualmente ativas depois de construídas.</p>
+<div class="pills" id="facilityStates">
+<span class="pill">🏠 Habitat: suporte à vida</span>
+<span class="pill">🧪 Reciclagem: por instalar</span>
+<span class="pill">🔋 Energia: por instalar</span>
+<span class="pill">🛡️ Proteção: por instalar</span>
+</div></section>
+<section class="panel resourcepanel"><div class="statusline"><span>ESTADO DOS SISTEMAS</span><span id="dayLabel">DIA 1 / 30</span></div><div class="progress"><i id="progressBar" style="width:3%"></i></div><h2>RECURSOS E SUPORTE À VIDA</h2><div class="resourceGrid" id="resourceGrid"></div></section>
+<section class="panel controlpanel"><h2>COMANDO DA MISSÃO</h2><div class="actions"><button class="primary" id="day1">▶ AVANÇAR 1 DIA</button><button id="day3">▷ AVANÇAR 3 DIAS</button><button id="pause">⏸ PAUSAR</button><button id="speed">⏩ 1×</button><button id="explore">🚙 EXPLORAR</button><button id="repair">🔧 REPARAR</button><button id="solar">☀️ RECARGA SOLAR</button><button id="harvest">🌱 COLHER</button></div></section>
+<div class="side">
+<section class="panel"><h2>OBJETIVOS DA MISSÃO</h2><div class="objectives" id="objectives"></div><div class="pills"><span class="pill" id="xp">⭐ 0 XP</span><span class="pill" id="explored">🧭 0 explorações</span><span class="pill" id="destination">🌙 LUA</span></div></section>
+<section class="panel"><div class="assistantHead"><div class="avatar">🤖</div><div><b>AIDA · TUTORA DE MISSÃO</b><div class="muted">Assistente educativa</div></div><span style="margin-left:auto;color:var(--green)">●</span></div><div class="reply" id="answer">Olá, comandante! Sou a AIDA. Pergunta-me sobre oxigénio, água, energia, radiação ou a tua missão.</div><div class="chat"><input id="question" placeholder="Pergunta à AIDA..."><button class="primary" id="ask">Enviar</button></div><div class="muted" id="aiState" style="margin-top:7px">Modo educativo local · ligação a IA online pode ser adicionada depois</div></section>
+<section class="panel"><h2>INSTALAÇÕES DA BASE</h2><div class="twocol"><button class="tile" id="buildShield">🛡️ Gerador de escudo<small>Reduz a radiação recebida</small></button><button class="tile" id="buildGreenhouse">🌿 Estufa hidropónica<small>Produz alimentos</small></button><button class="tile" id="buildWater">💧 Reciclador de água<small>Filtra e reutiliza água</small></button><button class="tile" id="buildBattery">🔋 Central de baterias<small>Armazena energia solar</small></button></div><div class="pills"><span class="pill" id="greenhouseStatus">🌱 Estufa inativa · constrói para começar</span></div></section>
+<section class="panel"><h2>DIÁRIO DE BORDO</h2><div class="feed" id="log"></div></section>
+<section class="panel"><h2>DESTINO DA MISSÃO</h2><div class="tabs"><button class="active" data-world="moon">🌙 Lua</button><button data-world="mars">🔴 Marte</button></div><p class="muted" id="worldInfo">A Lua tem gravidade reduzida, longas noites e exposição à radiação. Planeia a energia e a proteção.</p><button id="restart" style="width:100%;margin-top:8px">↻ Reiniciar missão</button></section>
+</div>
+<footer>JUNIOR SPACE MISSION · PROTÓTIPO DE TESTE · Aprender, decidir e explorar.</footer>
+</main>
+<div class="modal" id="modal"><div class="modalbox"><h2 id="modalTitle">Tutorial</h2><p id="modalText"></p><button class="primary" id="modalClose">CONTINUAR</button></div></div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const initial={oxygen:94,water:88,food:86,energy:92,fuel:78,health:98,radiation:82};
+const names={oxygen:'Oxigénio',water:'Água',food:'Alimentos',energy:'Energia',fuel:'Combustível',health:'Saúde',radiation:'Proteção'};
+const icons={oxygen:'🫁',water:'💧',food:'🥫',energy:'⚡',fuel:'⛽',health:'❤️',radiation:'🛡️'};
+let state={day:1,planet:'moon',paused:false,speed:1,xp:0,explorations:0,resources:{...initial},built:{shield:false,greenhouse:false,water:false,battery:false},greenhouseGrowth:0,logs:[]};
+
+let roverTarget=0, sound=true;
+let currentLanguage='pt';
+const translations={
+pt:{
+ mission:'Missão',lunar:'BASE LUNAR · CRATERA SHACKLETON',martian:'BASE MARCIANA · PLANÍCIE DE UTOPIA',
+ day:'DIA',tutorial:'▶ Tutorial',scene:'● AMBIENTE 3D · BASE LUNAR',habitat:'🏠 Habitat',greenhouse:'🌱 Estufa',lab:'🔬 Laboratório',rover:'🚙 Rover',solarPanels:'☀️ Painéis solares',
+ systems:'ESTADO DOS SISTEMAS',resources:'RECURSOS E SUPORTE À VIDA',command:'COMANDO DA MISSÃO',advance1:'▶ AVANÇAR 1 DIA',advance3:'▷ AVANÇAR 3 DIAS',pause:'⏸ PAUSAR',resume:'▶ RETOMAR',explore:'🚙 EXPLORAR',repair:'🔧 REPARAR',solar:'☀️ RECARGA SOLAR',harvest:'🌱 COLHER',
+ objectives:'OBJETIVOS DA MISSÃO',oxygenGoal:'Manter o oxigénio acima de 25%',waterGoal:'Garantir reservas de água',foodGoal:'Manter alimentos suficientes',radiationGoal:'Proteger a tripulação da radiação',exploreGoal:'Explorar pelo menos 3 zonas',
+ assistant:'AIDA · TUTORA DE MISSÃO',assistantSub:'Assistente educativa',greeting:'Olá, comandante! Sou a AIDA. Pergunta-me sobre oxigénio, água, energia, radiação ou a tua missão.',placeholder:'Pergunta à AIDA...',send:'Enviar',localMode:'Modo educativo local · ligação a IA online pode ser adicionada depois',
+ facilities:'INSTALAÇÕES DA BASE',shield:'🛡️ Gerador de escudo',shieldDesc:'Reduz a radiação recebida',hydro:'🌿 Estufa hidropónica',hydroDesc:'Produz alimentos',recycler:'💧 Reciclador de água',recyclerDesc:'Filtra e reutiliza água',battery:'🔋 Central de baterias',batteryDesc:'Armazena energia solar',journal:'DIÁRIO DE BORDO',destination:'DESTINO DA MISSÃO',moon:'🌙 Lua',mars:'🔴 Marte',restart:'↻ Reiniciar missão',continue:'CONTINUAR',
+ moonInfo:'A Lua tem gravidade reduzida, longas noites e exposição à radiação. Planeia a energia e a proteção.',marsInfo:'Marte tem atmosfera muito fina, frio intenso, poeira e tempestades. Protege os equipamentos e gere a energia.',
+ oxygen:'Oxigénio',water:'Água',food:'Alimentos',energy:'Energia',fuel:'Combustível',health:'Saúde',protection:'Proteção',
+ selected:'Idioma selecionado',selectedText:'Selecionaste Português.',notInstalled:'não instalado',active:'ATIVO',notBuilt:'não instalada'
+},
+en:{
+ mission:'Mission',lunar:'LUNAR BASE · SHACKLETON CRATER',martian:'MARTIAN BASE · UTOPIA PLANITIA',
+ day:'DAY',tutorial:'▶ Tutorial',scene:'● 3D ENVIRONMENT · LUNAR BASE',habitat:'🏠 Habitat',greenhouse:'🌱 Greenhouse',lab:'🔬 Laboratory',rover:'🚙 Rover',solarPanels:'☀️ Solar panels',
+ systems:'SYSTEM STATUS',resources:'RESOURCES & LIFE SUPPORT',command:'MISSION CONTROL',advance1:'▶ ADVANCE 1 DAY',advance3:'▷ ADVANCE 3 DAYS',pause:'⏸ PAUSE',resume:'▶ RESUME',explore:'🚙 EXPLORE',repair:'🔧 REPAIR',solar:'☀️ SOLAR RECHARGE',harvest:'🌱 HARVEST',
+ objectives:'MISSION OBJECTIVES',oxygenGoal:'Keep oxygen above 25%',waterGoal:'Maintain water reserves',foodGoal:'Maintain sufficient food',radiationGoal:'Protect the crew from radiation',exploreGoal:'Explore at least 3 zones',
+ assistant:'AIDA · MISSION TUTOR',assistantSub:'Educational assistant',greeting:'Hello, commander! I am AIDA. Ask me about oxygen, water, energy, radiation, or your mission.',placeholder:'Ask AIDA...',send:'Send',localMode:'Local educational mode · online AI connection can be added later',
+ facilities:'BASE FACILITIES',shield:'🛡️ Shield generator',shieldDesc:'Reduces incoming radiation',hydro:'🌿 Hydroponic greenhouse',hydroDesc:'Produces food',recycler:'💧 Water recycler',recyclerDesc:'Filters and reuses water',battery:'🔋 Battery station',batteryDesc:'Stores solar energy',journal:'MISSION LOG',destination:'MISSION DESTINATION',moon:'🌙 Moon',mars:'🔴 Mars',restart:'↻ Restart mission',continue:'CONTINUE',
+ moonInfo:'The Moon has low gravity, long nights, and radiation exposure. Plan your energy and protection.',marsInfo:'Mars has a very thin atmosphere, extreme cold, dust, and storms. Protect equipment and manage energy.',
+ oxygen:'Oxygen',water:'Water',food:'Food',energy:'Energy',fuel:'Fuel',health:'Health',protection:'Protection',
+ selected:'Language selected',selectedText:'You selected English.',notInstalled:'not installed',active:'ACTIVE',notBuilt:'not built'
+},
+es:{
+ mission:'Misión',lunar:'BASE LUNAR · CRÁTER SHACKLETON',martian:'BASE MARCIANA · PLANICIE DE UTOPÍA',
+ day:'DÍA',tutorial:'▶ Tutorial',scene:'● ENTORNO 3D · BASE LUNAR',habitat:'🏠 Hábitat',greenhouse:'🌱 Invernadero',lab:'🔬 Laboratorio',rover:'🚙 Rover',solarPanels:'☀️ Paneles solares',
+ systems:'ESTADO DE LOS SISTEMAS',resources:'RECURSOS Y SOPORTE VITAL',command:'CONTROL DE MISIÓN',advance1:'▶ AVANZAR 1 DÍA',advance3:'▷ AVANZAR 3 DÍAS',pause:'⏸ PAUSAR',resume:'▶ REANUDAR',explore:'🚙 EXPLORAR',repair:'🔧 REPARAR',solar:'☀️ RECARGA SOLAR',harvest:'🌱 COSECHAR',
+ objectives:'OBJETIVOS DE LA MISIÓN',oxygenGoal:'Mantener el oxígeno por encima del 25%',waterGoal:'Garantizar reservas de agua',foodGoal:'Mantener alimentos suficientes',radiationGoal:'Proteger a la tripulación de la radiación',exploreGoal:'Explorar al menos 3 zonas',
+ assistant:'AIDA · TUTORA DE MISIÓN',assistantSub:'Asistente educativa',greeting:'¡Hola, comandante! Soy AIDA. Pregúntame sobre oxígeno, agua, energía, radiación o tu misión.',placeholder:'Pregunta a AIDA...',send:'Enviar',localMode:'Modo educativo local · la conexión a IA en línea se puede añadir después',
+ facilities:'INSTALACIONES DE LA BASE',shield:'🛡️ Generador de escudo',shieldDesc:'Reduce la radiación recibida',hydro:'🌿 Invernadero hidropónico',hydroDesc:'Produce alimentos',recycler:'💧 Reciclador de agua',recyclerDesc:'Filtra y reutiliza el agua',battery:'🔋 Central de baterías',batteryDesc:'Almacena energía solar',journal:'DIARIO DE A BORDO',destination:'DESTINO DE LA MISIÓN',moon:'🌙 Luna',mars:'🔴 Marte',restart:'↻ Reiniciar misión',continue:'CONTINUAR',
+ moonInfo:'La Luna tiene baja gravedad, noches largas y exposición a la radiación. Planifica la energía y la protección.',marsInfo:'Marte tiene una atmósfera muy fina, frío intenso, polvo y tormentas. Protege los equipos y gestiona la energía.',
+ oxygen:'Oxígeno',water:'Agua',food:'Alimentos',energy:'Energía',fuel:'Combustible',health:'Salud',protection:'Protección',
+ selected:'Idioma seleccionado',selectedText:'Has seleccionado Español.',notInstalled:'no instalado',active:'ACTIVO',notBuilt:'no construida'
+}};
+const tr=k=>(translations[currentLanguage]||translations.pt)[k]||translations.pt[k]||k;
+function applyLanguage(){
+ const set=(id,key)=>{const el=$(id);if(el)el.textContent=tr(key)};
+ set('tutorialBtn','tutorial');set('sceneTitle','scene');set('day1','advance1');set('day3','advance3');
+ set('explore','explore');set('repair','repair');set('solar','solar');set('harvest','harvest');
+ set('question','');$('question').placeholder=tr('placeholder');set('ask','send');set('answer','greeting');set('aiState','localMode');
+ const hs=document.querySelectorAll('main>.panel h2'); 
+ if(hs[0])hs[0].textContent='🔎 '+tr('systems');
+ if(hs[1])hs[1].textContent=tr('resources');
+ if(hs[2])hs[2].textContent=tr('command');
+ const sideHeads=document.querySelectorAll('.side .panel h2');
+ ['objectives','facilities','journal','destination'].forEach((k,i)=>{if(sideHeads[i])sideHeads[i].textContent=tr(k)});
+ const assistantTitle=document.querySelector('.assistantHead b');if(assistantTitle)assistantTitle.textContent=tr('assistant');
+ const assistantSub=document.querySelector('.assistantHead .muted');if(assistantSub)assistantSub.textContent=tr('assistantSub');
+ const tiles=[['buildShield','shield','shieldDesc'],['buildGreenhouse','hydro','hydroDesc'],['buildWater','recycler','recyclerDesc'],['buildBattery','battery','batteryDesc']];
+ tiles.forEach(([id,k,d])=>{const b=$(id);if(b){b.childNodes[0].textContent=tr(k);const sm=b.querySelector('small');if(sm)sm.textContent=tr(d)}});
+ const tabs=document.querySelectorAll('[data-world]');if(tabs[0])tabs[0].textContent=tr('moon');if(tabs[1])tabs[1].textContent=tr('mars');
+ set('restart','restart');set('modalClose','continue');
+ const resNames={oxygen:'oxygen',water:'water',food:'food',energy:'energy',fuel:'fuel',health:'health',radiation:'protection'};
+ Object.keys(resNames).forEach(k=>{names[k]=tr(resNames[k])});
+ render();
+}
+
+function log(t){state.logs.unshift('Dia '+state.day+': '+t);state.logs=state.logs.slice(0,25);$('log').innerHTML=state.logs.map(x=>'<div>'+x+'</div>').join('');}
+function save(){try{localStorage.setItem('juniorSpaceMission',JSON.stringify(state))}catch(e){}}
+function load(){try{let x=JSON.parse(localStorage.getItem('juniorSpaceMission'));if(x)state={...state,...x,resources:{...initial,...x.resources},built:{...state.built,...x.built},greenhouseGrowth:Number.isFinite(x.greenhouseGrowth)?x.greenhouseGrowth:0}}catch(e){}}
+function render(){
+ $('dayLabel').textContent=tr('day')+' '+state.day+' / 30';$('missionSub').textContent=(state.planet==='moon'?tr('lunar'):tr('martian'))+' · '+tr('day')+' '+state.day+'/30';$('progressBar').style.width=(state.day/30*100)+'%';
+ $('missionTitle').textContent=tr('mission')+': '+(state.planet==='moon'?(currentLanguage==='en'?'Lunar Aurora':currentLanguage==='es'?'Aurora Lunar':'Aurora Lunar'):(currentLanguage==='en'?'Martian Horizon':currentLanguage==='es'?'Horizonte Marciano':'Horizonte Marciano'));$('destination').textContent=state.planet==='moon'?'🌙 '+tr('moon').replace('🌙 ',''):'🔴 '+tr('mars').replace('🔴 ','');$('xp').textContent='⭐ '+state.xp+' XP';$('explored').textContent='🧭 '+state.explorations+' explorações';
+ $('resourceGrid').innerHTML=Object.keys(names).map(k=>{let v=Math.round(state.resources[k]),color=v<25?'var(--red)':v<50?'var(--gold)':'var(--green)';return '<div class="res"><div class="reshead"><span>'+icons[k]+' '+names[k]+'</span><span>'+v+'%</span></div><strong>'+v+'%</strong><div class="bar"><i style="width:'+v+'%;background:'+color+'"></i></div></div>'}).join('');
+ $('objectives').innerHTML=(state.resources.oxygen>25?'✅':'⚠️')+' '+tr('oxygenGoal')+'<br>'+(state.resources.water>25?'✅':'⬜')+' '+tr('waterGoal')+'<br>'+(state.resources.food>25?'✅':'⬜')+' '+tr('foodGoal')+'<br>'+(state.resources.radiation>35?'✅':'⬜')+' '+tr('radiationGoal')+'<br>'+(state.explorations>=3?'✅':'⬜')+' '+tr('exploreGoal');
+ $('pause').textContent=state.paused?tr('resume'):tr('pause');$('speed').textContent='⏩ '+state.speed+'×';
+ updateFacilityInspector(); $('greenhouseStatus').textContent=state.built.greenhouse?'🌱 Estufa ativa · crescimento '+Math.round(state.greenhouseGrowth||0)+'%':'🌱 Estufa inativa · constrói para começar';
+ $('worldInfo').textContent=state.planet==='moon'?tr('moonInfo'):tr('marsInfo');
+}
+function advance(n){if(state.paused)return;for(let i=0;i<n&&state.day<30;i++){state.day++;let r=state.resources;r.oxygen-=2.7;r.water-=state.built.water?1:2.5;r.food-=state.built.greenhouse?1.1:2.3;r.energy-=1.8+(state.planet==='mars'?.6:0);r.fuel-=.7;r.radiation-=state.built.shield?.4:1.6;if(state.planet==='mars')r.radiation-=.5;
+ if(state.built.greenhouse){state.greenhouseGrowth=Math.min(100,(state.greenhouseGrowth||0)+12);if(state.day%2===0)r.food=Math.min(100,r.food+5);}
+ if(state.built.water&&state.day%2===0)r.water=Math.min(100,r.water+4);
+ if(state.built.battery&&state.day%3===0)r.energy=Math.min(100,r.energy+8);
+ if(state.built.greenhouse&&window.spaceWorld)window.spaceWorld.setGreenhouse(true,state.greenhouseGrowth||0);
+ if(r.energy<20||r.oxygen<25||r.water<20||r.food<20||r.radiation<20)r.health-=4;
+ Object.keys(r).forEach(k=>r[k]=Math.max(0,Math.min(100,r[k])));
+ if(state.day%5===0){r.energy=Math.min(100,r.energy+9);log('Manutenção programada: painéis e sistemas verificados.')}
+ if(state.day===8){log('Alerta: atividade solar elevada prevista. Verifica a proteção contra radiação.');$('answer').textContent='Alerta de atividade solar: recomendo verificar o escudo e manter a tripulação no habitat protegido.'}
+ }
+ if(state.day>=30)showModal('Missão concluída!','Chegaste ao dia 30. Analisa os recursos e tenta melhorar a eficiência na próxima campanha.');
+ if(Math.min(...Object.values(state.resources))<15)$('answer').textContent='ALERTA CRÍTICO: um recurso está quase esgotado. Repara sistemas ou constrói instalações antes de avançar.';
+ render();save();}
+
+function updateFacilityInspector(){
+ const labels=[
+  ['🏠 Habitat','módulo branco com cúpula azul: abriga a tripulação e mantém o suporte à vida.'],
+  ['🌱 Estufa','cultiva alimentos. As plantas aparecem e crescem com o passar dos dias.'],
+  ['💧 Reciclador de água',state.built.water?'filtra e reutiliza água; os níveis azuis nos tanques representam a reserva.':'ainda não instalado; quando construído, os tanques e tubos ficam ativos.'],
+  ['🔋 Central de baterias',state.built.battery?'armazena energia; os indicadores luminosos mostram a carga do sistema.':'ainda não instalada; quando construída, os módulos acendem.'],
+  ['🛡️ Gerador de escudo',state.built.shield?'gera um campo de proteção contra radiação ao redor da base.':'ainda não instalado; quando construído, o emissor e os anéis de energia ficam ativos.'],
+  ['🔬 Laboratório','módulo lilás: permite analisar amostras e estudar o ambiente lunar.']
+ ];
+ const summary=$('facilitySummary');
+ if(summary)summary.textContent=labels.map(x=>x[0]+': '+x[1]).join('  •  ');
+ const states=$('facilityStates');
+ if(states)states.innerHTML=[
+  '<span class="pill">💧 Água: '+(state.built.water?'RECICLAGEM ATIVA':'não instalado')+'</span>',
+  '<span class="pill">🔋 Energia: '+(state.built.battery?'ARMAZENAMENTO ATIVO':'não instalado')+'</span>',
+  '<span class="pill">🛡️ Escudo: '+(state.built.shield?'PROTEÇÃO ATIVA':'não instalado')+'</span>',
+  '<span class="pill">🌱 Estufa: '+(state.built.greenhouse?'CULTIVO ATIVO':'não instalada')+'</span>'
+ ].join('');
+}
+
+function action(type){
+ let r=state.resources;
+ if(type==='explore'){if(r.fuel<10||r.energy<7){log('Exploração cancelada: falta combustível ou energia.');return}r.fuel-=10;r.energy-=7;state.explorations++;state.xp+=50;roverTarget=roverTarget===0?4:-4;log('O rover regressou com amostras e dados geológicos.');}
+ if(type==='repair'){r.energy=Math.max(0,r.energy-6);r.health=Math.min(100,r.health+8);r.radiation=Math.min(100,r.radiation+8);r.oxygen=Math.min(100,r.oxygen+4);log('Equipa técnica reparou filtros e inspecionou o habitat.');}
+ if(type==='solar'){r.energy=Math.min(100,r.energy+23);state.xp+=10;log('Painéis solares reposicionados: energia recuperada.');}
+ if(type==='harvest'){if(!state.built.greenhouse){log('Constrói primeiro a estufa hidropónica.');return}if((state.greenhouseGrowth||0)<35){log('As plantas ainda estão a crescer. Avança alguns dias antes da colheita.');return}r.food=Math.min(100,r.food+22);r.water=Math.max(0,r.water-4);state.greenhouseGrowth=0;state.xp+=15;log('Colheita concluída: alimentos adicionados ao armazém.');if(window.spaceWorld)window.spaceWorld.setGreenhouse(true,state.greenhouseGrowth);}
+ let map={shield:['Escudo de radiação instalado.',20],greenhouse:['Estufa hidropónica construída.',22],water:['Unidade de reciclagem de água construída.',18],battery:['Banco de baterias instalado.',20]};
+ if(map[type]){if(state.built[type]){log('Esta instalação já foi construída.');return}if(r.energy<map[type][1]){log('Energia insuficiente para construir esta instalação.');return}r.energy-=map[type][1];state.built[type]=true;state.xp+=30;log(map[type][0]);if(type==='greenhouse'&&window.spaceWorld)window.spaceWorld.setGreenhouse(true,state.greenhouseGrowth||0);}
+ render();save();
+}
+$('day1').onclick=()=>advance(1);$('day3').onclick=()=>advance(3);$('pause').onclick=()=>{state.paused=!state.paused;render()};$('speed').onclick=()=>{state.speed=state.speed===1?2:state.speed===2?3:1;render()};
+$('explore').onclick=()=>action('explore');$('repair').onclick=()=>action('repair');$('solar').onclick=()=>action('solar');$('harvest').onclick=()=>action('harvest');
+$('buildShield').onclick=()=>action('shield');$('buildGreenhouse').onclick=()=>action('greenhouse');$('buildWater').onclick=()=>action('water');$('buildBattery').onclick=()=>action('battery');
+function showModal(title,body){$('modalTitle').textContent=title;$('modalText').textContent=body;$('modal').classList.add('open')}
+$('modalClose').onclick=()=>$('modal').classList.remove('open');
+$('tutorialBtn').onclick=()=>showModal('Bem-vindo, comandante!','És responsável por uma base científica. Mantém oxigénio, água, alimentos, energia, combustível, saúde e proteção contra radiação. Avança um dia de cada vez. Explora com o rover, constrói instalações e observa como cada decisão afeta os outros sistemas. Uma missão exige escolhas e equilíbrio!');
+$('restart').onclick=()=>{if(confirm('Queres apagar o progresso guardado e reiniciar a missão?')){state={day:1,planet:'moon',paused:false,speed:1,xp:0,explorations:0,resources:{...initial},built:{shield:false,greenhouse:false,water:false,battery:false},greenhouseGrowth:0,logs:[]};log('Nova missão iniciada.');render();save();if(window.spaceWorld)window.spaceWorld.setFacilities(state.built,state.resources)}};
+document.querySelectorAll('[data-world]').forEach(b=>b.onclick=()=>{state.planet=b.dataset.world;document.querySelectorAll('[data-world]').forEach(x=>x.classList.toggle('active',x===b));log('Destino selecionado: '+(state.planet==='moon'?'Lua':'Marte')+'.');render();save();if(window.spaceWorld)window.spaceWorld.setPlanet(state.planet)});
+const answers=[
+[/agua|água|water/i,'A água é essencial para beber, higiene e cultivo. A unidade de reciclagem recupera parte da água usada, mas precisa de energia e manutenção.'],
+[/radia|escudo/i,'A radiação espacial inclui partículas solares e raios cósmicos. Um habitat protegido e um abrigo contra tempestades solares reduzem a exposição.'],
+[/energia|solar|bateria/i,'Os painéis solares transformam luz em eletricidade. As baterias armazenam energia para períodos de baixa produção.'],
+[/comida|alimento|estufa/i,'A estufa hidropónica permite cultivar plantas com água e nutrientes, sem solo tradicional. A colheita aumenta os alimentos, mas exige água e energia.'],
+[/oxig|respir/i,'O oxigénio é vital para respirar. Sistemas reais de suporte à vida controlam a atmosfera, removem dióxido de carbono e recuperam recursos.'],
+[/marte|lua|planeta/i,'A Lua não tem atmosfera respirável e tem gravidade de cerca de um sexto da Terra. Marte tem atmosfera muito fina, frio e poeira. Ambos exigem habitats pressurizados.'],
+[/rover|explor/i,'O rover é um veículo robótico usado para explorar, recolher amostras e estudar o terreno. A exploração consome energia e combustível no nosso simulador.']
+];
+function ask(){let q=$('question').value.trim();if(!q)return;$('question').value='';let found=answers.find(x=>x[0].test(q));$('answer').textContent=found?found[1]:'Boa pergunta, comandante! Uma missão espacial é um sistema de compromissos: melhorar uma instalação pode aumentar o consumo de energia, água ou materiais. Observa os indicadores e testa uma decisão de cada vez.';}
+$('ask').onclick=ask;$('question').addEventListener('keydown',e=>{if(e.key==='Enter')ask()});
+$('language').onchange=e=>{currentLanguage=e.target.value;applyLanguage();showModal(tr('selected'),tr('selectedText'));};
+$('soundBtn').onclick=()=>{sound=!sound;$('soundBtn').textContent=sound?'🔊':'🔇'};
+
+// Compatibilidade táctil para navegadores Android antigos sem Pointer Events.
+if(!('PointerEvent' in window)){
+ document.addEventListener('touchend',function(e){
+  const b=e.target.closest&&e.target.closest('button');
+  if(!b||b.disabled)return;
+  e.preventDefault();
+  b.click();
+ },{passive:false});
+}
+
+load();applyLanguage();render();if(!state.logs.length)log('Base estabelecida. Inicia a verificação dos sistemas.');
+// Three.js: renderização 3D da colónia. Requer ligação à Internet para carregar a biblioteca.
+function start3D(){
+ if(!window.THREE){$('sceneTitle').textContent='⚠️ 3D indisponível — verifica a ligação à Internet';return}
+ const canvas=$('world'),scene=new THREE.Scene();scene.background=new THREE.Color(0x030817);scene.fog=new THREE.Fog(0x030817,28,75);
+ const camera=new THREE.PerspectiveCamera(45,1,.1,150),renderer=new THREE.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;
+ scene.add(new THREE.HemisphereLight(0xa8d8ff,0x40384a,1.6));let sun=new THREE.DirectionalLight(0xffe5bd,2.7);sun.position.set(-9,16,8);sun.castShadow=true;scene.add(sun);
+ const material=(c,m=0,r=.7)=>new THREE.MeshStandardMaterial({color:c,metalness:m,roughness:r});
+ function add(g,m,x,y,z){let o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
+ let ground=add(new THREE.PlaneGeometry(110,110),material(0x3b3b43),0,-.18,0);ground.rotation.x=-Math.PI/2;
+ for(let i=0;i<250;i++){let rock=add(new THREE.DodecahedronGeometry(.12+Math.random()*.45),material(0x62636b),(Math.random()-.5)*38,.02,(Math.random()-.5)*28);rock.scale.y=.45}
+ for(let i=0;i<90;i++){let star=add(new THREE.SphereGeometry(.035,5,5),material(0xd7edff),(Math.random()-.5)*90,Math.random()*38+5,(Math.random()-.5)*90);star.castShadow=false}
+ let earth=add(new THREE.SphereGeometry(1.45,28,20),material(0x2872bb),-15,13,-26);earth.material.emissive=new THREE.Color(0x0a2349);
+ // habitat module and airlock
+ let hab=add(new THREE.CylinderGeometry(1.1,1.1,2.6,28),material(0xb7c7d5,.25),-3,1.05,0);hab.rotation.z=Math.PI/2;
+ add(new THREE.SphereGeometry(1.08,28,18,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x65d8ff,transparent:true,opacity:.5}),-3,2.25,0);
+ add(new THREE.BoxGeometry(.9,1.5,1.4),material(0x6d8296),-5,.75,0);
+ // greenhouse dome + visible hydroponic crop beds
+ const greenhouseDome=add(new THREE.SphereGeometry(1.25,32,24),new THREE.MeshPhysicalMaterial({color:0x55d9c2,transparent:true,opacity:.08,roughness:.18,metalness:.05,side:THREE.DoubleSide,depthWrite:false}),2,1,0);
+ greenhouseDome.scale.y=.7;
+ const greenhouseInterior=new THREE.Group();scene.add(greenhouseInterior);
+ const cropPlants=[];
+ const soilMat=material(0x453b32), bedMat=material(0x344c52), stemMat=material(0x3f9b58), leafMat=material(0x55bd68), leafLight=material(0x83d879);
+ // Two raised hydroponic beds inside the transparent dome.
+ for(let row=0;row<2;row++){
+   const bed=new THREE.Mesh(new THREE.BoxGeometry(1.72,.13,.42),bedMat);
+   bed.position.set(2,.13,(row===0?-.48:.48));bed.castShadow=true;bed.receiveShadow=true;greenhouseInterior.add(bed);
+   const soil=new THREE.Mesh(new THREE.BoxGeometry(1.62,.035,.34),soilMat);
+   soil.position.set(2,.215,(row===0?-.48:.48));greenhouseInterior.add(soil);
+   for(let col=0;col<4;col++){
+     const x=1.43+col*.38,z=(row===0?-.48:.48);
+     const plant=new THREE.Group();plant.position.set(x,.24,z);greenhouseInterior.add(plant);
+     // Several tapered stems and broad, individually angled leaves create a small leafy crop.
+     const stem=new THREE.Mesh(new THREE.CylinderGeometry(.025,.045,.38,9),stemMat);
+     stem.position.y=.19;stem.castShadow=true;plant.add(stem);
+     for(let k=0;k<7;k++){
+       const a=(Math.PI*2*k)/7+(col%2)*.22;
+       const leaf=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),k%2?leafMat:leafLight);
+       leaf.scale.set(.105,.045,.19);
+       leaf.position.set(Math.cos(a)*.105,.23+(k%3)*.035,Math.sin(a)*.105);
+       leaf.rotation.y=a;leaf.rotation.z=Math.cos(a)*-.38;
+       leaf.castShadow=true;plant.add(leaf);
+     }
+     const crown=new THREE.Mesh(new THREE.SphereGeometry(.105,12,9),leafLight);
+     crown.scale.y=.48;crown.position.y=.34;plant.add(crown);
+     cropPlants.push({group:plant,phase:col*.7+row*.9});
+   }
+ }
+ function updateGreenhouseVisual(active,growth){
+   const g=Math.max(0,Math.min(100,Number(growth)||0))/100;
+   greenhouseDome.material.opacity=active?.19:.035;
+   greenhouseDome.material.color.setHex(active?0x62e5c7:0x657987);
+   greenhouseInterior.visible=!!active;
+   cropPlants.forEach((p,i)=>{
+     const size=active?(.24+g*.76):0;
+     p.group.scale.set(size,size,size);
+     p.group.visible=!!active;
+   });
+ }
+ // laboratory and solar panels
+ add(new THREE.BoxGeometry(2.1,1.5,1.8),material(0x8b7abd),6,.75,0);
+ for(let side of [-1,1]){add(new THREE.BoxGeometry(3,.07,1.5),material(0x1e5595,.35),-3+side*4,.22,3);for(let i=0;i<5;i++)add(new THREE.BoxGeometry(.52,.035,1.44),material(0x4388ce,.4),-4.5+i*.62+side*4,.27,3)}
+ let shield=add(new THREE.TorusGeometry(2.35,.045,8,70),material(0x4bd9ff,.35),-3,1.6,0);shield.rotation.x=Math.PI/2;
+
+ // WATER RECYCLING UNIT: two tanks, filter column, pipes and animated water level.
+ const waterUnit=new THREE.Group();scene.add(waterUnit);waterUnit.position.set(6,0,4);
+ const tankMat=material(0xdce8ee,.22), metalMat=material(0x526b7d,.28), waterMat=new THREE.MeshStandardMaterial({color:0x27bce8,transparent:true,opacity:.78,roughness:.2,metalness:.05,emissive:0x063c58});
+ function waterTank(x,z,scale=1){
+   const shell=new THREE.Mesh(new THREE.CylinderGeometry(.48*scale,.48*scale,1.45*scale,24),tankMat);
+   shell.position.set(x,.82*scale,z);shell.castShadow=true;waterUnit.add(shell);
+   const cap=new THREE.Mesh(new THREE.CylinderGeometry(.5*scale,.5*scale,.12*scale,24),metalMat);
+   cap.position.set(x,1.58*scale,z);waterUnit.add(cap);
+   const liquid=new THREE.Mesh(new THREE.CylinderGeometry(.39*scale,.39*scale,.9*scale,20),waterMat);
+   liquid.position.set(x,.65*scale,z);waterUnit.add(liquid);
+   const gauge=new THREE.Mesh(new THREE.BoxGeometry(.08*scale,.65*scale,.08*scale),material(0x43d8ef,.2));
+   gauge.position.set(x+.5*scale,.85*scale,z);waterUnit.add(gauge);
+   return {liquid,scale};
+ }
+ const waterTanks=[waterTank(-.65,0,1),waterTank(.65,0,1)];
+ const filterColumn=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,1.3,18),material(0x7e9cae,.2));
+ filterColumn.position.set(0,.72,-.78);waterUnit.add(filterColumn);
+ const filterTop=new THREE.Mesh(new THREE.SphereGeometry(.24,16,10),material(0x53d8e9,.2));
+ filterTop.position.set(0,1.4,-.78);waterUnit.add(filterTop);
+ const waterPipe=new THREE.Mesh(new THREE.TorusGeometry(.72,.055,8,40,Math.PI),material(0x5b8295,.2));
+ waterPipe.rotation.z=Math.PI;waterPipe.position.set(0,1.42,0);waterUnit.add(waterPipe);
+ const waterBase=new THREE.Mesh(new THREE.BoxGeometry(2.2,.18,1.9),material(0x344c5c));
+ waterBase.position.set(0,.08,0);waterUnit.add(waterBase);
+ waterUnit.visible=false;
+
+ // BATTERY BANK: three industrial storage modules with glowing charge indicators.
+ const batteryUnit=new THREE.Group();scene.add(batteryUnit);batteryUnit.position.set(-7,0,4);
+ const batteryCells=[];
+ for(let i=0;i<3;i++){
+   const cell=new THREE.Group();cell.position.x=(i-1)*.82;batteryUnit.add(cell);
+   const body=new THREE.Mesh(new THREE.BoxGeometry(.66,1.05,.72),material(0x304c65,.25));body.position.y=.62;cell.add(body);
+   const front=new THREE.Mesh(new THREE.BoxGeometry(.46,.72,.035),material(0x172b3d));front.position.set(0,.65,.38);cell.add(front);
+   for(let j=0;j<4;j++){
+     const led=new THREE.Mesh(new THREE.BoxGeometry(.27,.09,.045),new THREE.MeshStandardMaterial({color:0x4ce0a1,emissive:0x155b3e,emissiveIntensity:.2}));
+     led.position.set(0,.4+j*.16,.405);cell.add(led);
+   }
+   const cap=new THREE.Mesh(new THREE.BoxGeometry(.24,.12,.28),metalMat);cap.position.set(0,1.22,0);cell.add(cap);
+   batteryCells.push(cell);
+ }
+ const batteryBase=new THREE.Mesh(new THREE.BoxGeometry(2.9,.18,1.25),material(0x344c5c));batteryBase.position.y=.08;batteryUnit.add(batteryBase);
+ batteryUnit.visible=false;
+
+ // RADIATION SHIELD GENERATOR: mast, emitter rings and a visible protective field.
+ const shieldUnit=new THREE.Group();scene.add(shieldUnit);shieldUnit.position.set(-7,0,-3);
+ const shieldBase=new THREE.Mesh(new THREE.CylinderGeometry(.72,.85,.28,20),metalMat);shieldBase.position.y=.14;shieldUnit.add(shieldBase);
+ const shieldMast=new THREE.Mesh(new THREE.CylinderGeometry(.13,.18,1.65,14),material(0x9db4c5,.2));shieldMast.position.y=1;shieldUnit.add(shieldMast);
+ const shieldOrb=new THREE.Mesh(new THREE.SphereGeometry(.38,20,14),new THREE.MeshStandardMaterial({color:0x55dfff,emissive:0x08739b,emissiveIntensity:.2,transparent:true,opacity:.9}));shieldOrb.position.y=1.95;shieldUnit.add(shieldOrb);
+ const shieldRings=[];
+ for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(.58+i*.22,.035,8,48),new THREE.MeshStandardMaterial({color:0x49dfff,emissive:0x0a7194,emissiveIntensity:.15,transparent:true,opacity:.2}));ring.position.y=1.95;ring.rotation.x=Math.PI/2;shieldUnit.add(ring);shieldRings.push(ring)}
+ shieldUnit.visible=false;
+
+ // The laboratory cube is a research module: add a door, window and antenna so its role is recognizable.
+ const labDoor=add(new THREE.BoxGeometry(.48,.9,.06),material(0x263c55),6,.48,.94);
+ const labWindow=add(new THREE.BoxGeometry(.72,.42,.07),new THREE.MeshStandardMaterial({color:0x76dfff,emissive:0x12445a,metalness:.15,roughness:.2}),6,1.08,.94);
+ const labAntenna=add(new THREE.CylinderGeometry(.035,.035,.85,8),material(0x9cb8ca),6,1.9,-.45);
+ const labDish=add(new THREE.SphereGeometry(.24,16,8,0,Math.PI*2,0,Math.PI/2),material(0x9cb8ca),6,2.32,-.45);
+ labDish.rotation.x=Math.PI;
+
+ function updateFacilityVisuals(built,resources){
+   waterUnit.visible=!!built.water;
+   batteryUnit.visible=!!built.battery;
+   shieldUnit.visible=!!built.shield;
+   if(built.water){
+     const level=Math.max(.12,Math.min(1,(resources.water||0)/100));
+     waterTanks.forEach(t=>{t.liquid.scale.y=level;t.liquid.position.y=.22+.43*level});
+     waterMat.color.setHex((resources.water||0)<25?0xe9a23b:0x27bce8);
+     waterMat.emissive.setHex((resources.water||0)<25?0x63320a:0x063c58);
+   }
+ }
+
+ // rover group
+ const rover=new THREE.Group();scene.add(rover);let body=new THREE.Mesh(new THREE.BoxGeometry(1.4,.34,.85),material(0xd5a844,.3));body.position.y=.65;rover.add(body);let cockpit=new THREE.Mesh(new THREE.BoxGeometry(.5,.4,.58),material(0x8bd9ef,.25));cockpit.position.set(-.12,.98,0);rover.add(cockpit);
+ for(let x of [-.48,.48])for(let z of [-.5,.5]){let w=new THREE.Mesh(new THREE.CylinderGeometry(.21,.21,.15,14),material(0x202a35));w.rotation.x=Math.PI/2;w.position.set(x,.4,z);rover.add(w)}
+ rover.position.set(0,0,5);
+ let yaw=0,pitch=.17,zoom=1,drag=false,lastX=0,lastY=0;canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!drag)return;yaw+=(e.clientX-lastX)*.008;pitch=Math.max(-.15,Math.min(.75,pitch+(e.clientY-lastY)*.005));lastX=e.clientX;lastY=e.clientY});canvas.addEventListener('pointerup',()=>drag=false);canvas.addEventListener('wheel',e=>{zoom=Math.max(.65,Math.min(1.8,zoom+e.deltaY*.001));e.preventDefault()},{passive:false});
+ $('viewReset').onclick=()=>{yaw=0;pitch=.17;zoom=1};$('zoomPlus').onclick=()=>zoom=Math.min(1.8,zoom+.12);$('zoomMinus').onclick=()=>zoom=Math.max(.65,zoom-.12);
+ let resize=()=>{let w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};new ResizeObserver(resize).observe(canvas);resize();
+ window.spaceWorld={
+ setPlanet(p){scene.background=new THREE.Color(p==='moon'?0x030817:0x1b0b12);ground.material.color.setHex(p==='moon'?0x3b3b43:0x75443a);earth.visible=p==='moon'},
+ setGreenhouse(active,growth){updateGreenhouseVisual(active,growth)},
+ setFacilities(built,resources){updateFacilityVisuals(built,resources)}
+};
+ updateGreenhouseVisual(!!state.built.greenhouse,state.greenhouseGrowth||0);
+ updateFacilityVisuals(state.built,state.resources);
+ let moveX=0;const oldExplore=$('explore').onclick;$('explore').onclick=()=>{oldExplore();moveX=moveX===0?4:-4};
+ function animate(){requestAnimationFrame(animate);const t=performance.now()*.001;cropPlants.forEach((p,i)=>{if(p.group.visible)p.group.rotation.z=Math.sin(t*1.25+p.phase)*.025});
+ shieldRings.forEach((r,i)=>{if(shieldUnit.visible){r.rotation.z=t*(.22+i*.12);r.material.opacity=.35+.18*Math.sin(t*2+i)}});
+ batteryCells.forEach((c,i)=>{c.children.forEach((part,j)=>{if(part.material&&part.material.emissive)part.material.emissiveIntensity=.25+.18*Math.sin(t*2+i+j)})});rover.position.x+=(moveX-rover.position.x)*.025;let d=23/zoom;camera.position.set(Math.sin(yaw)*d,8+pitch*8,Math.cos(yaw)*d);camera.lookAt(0,1.1,0);renderer.render(scene,camera)}animate();
+}
+if(window.THREE)start3D();else window.addEventListener('load',start3D);
+})();
+</script>
+</body>
+</html>
